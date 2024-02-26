@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  ftp_service:
+    image: bogem/ftp
+    ports:
+      - "20:20"
+      - "21:21"
+      - "47400-47470:47400-47470"
+    environment:
+      FTP_USER: ftpUser
+      FTP_PASS: ftpPassword@123
+      PASV_ADDRESS: 10.0.75.1
+    container_name: ftp
+    restart: always
+    volumes:
+      - ./ftp-volume:/home/vsftpd
+    networks:
+      - app_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ftp_app
+    ports:
+      - "5000:80"
+    networks:
+      - app_network
+    environment:
+      - FTP__Host=ftp://ftp_service/
+
+networks:
+  app_network:
